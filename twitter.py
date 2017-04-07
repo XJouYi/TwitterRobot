@@ -5,6 +5,7 @@ import os
 import socks
 import json
 from bs4 import BeautifulSoup
+from config import Config
 
 class Twitter(object):
     def __init__(self,config):
@@ -22,6 +23,8 @@ class Twitter(object):
             self.session.proxies = { "http": self.config.ProxyUrl, "https": self.config.ProxyUrl, } 
         
         self.getToken()
+        self.login()
+
     def getToken(self):
         soup = BeautifulSoup(self.session.get('https://twitter.com').content,'lxml')
         token = soup.find_all('input',{'name':'authenticity_token'})
@@ -29,8 +32,8 @@ class Twitter(object):
         print('token',token[0].get('value'))
     def login(self):
         data = {
-            'session[username_or_email]' :'xjouyi@163.com',
-            'session[password]':'jy123456',
+            'session[username_or_email]' :self.config.Login,
+            'session[password]': self.config.Password,
             'remember_me':1,
             'return_to_ssl':'true',
             'scribe_log':'',
@@ -64,7 +67,7 @@ class Twitter(object):
         self.session.headers["referer"]="https://twitter.com/"
         resp = self.session.post('https://upload.twitter.com/i/media/upload.json',data = data)
         resultJson = json.loads(resp.content)
-        media_id = resultJson['media_id']
+        media_id = resultJson['media_id_string']
         
         self.uploadImageAppend(media_id,path)
         return media_id
@@ -86,24 +89,24 @@ class Twitter(object):
         })
         # print(resp.content)
         
-    def sendImage(self,test):
-        media_id = self.uploadImage('/Users/jinyi/Downloads/IMG_0728.PNG')
+    def sendImage(self,text,media_id):
+        # media_id = self.uploadImage('/Users/jinyi/Downloads/IMG_0728.PNG')
         # media_id = '850180885173415936'
         data = {
             'authenticity_token' : self.authenticity_token,
             'is_permalink_page' : 'false',
             'media_ids' : media_id,
             'place_id':'',
-            'status': test,
+            'status': text,
             'tagged_users':''
         }
         self.session.headers["origin"]="https://twitter.com"
         self.session.headers["referer"]="https://twitter.com/"
         self.session.headers["x-twitter-active-user"] = 'yes'
         resp = self.session.post('https://twitter.com/i/tweet/create',data = data)
-        print(resp.content)
+        # print(resp.content)
         
 if __name__ == '__main__':
-    tw = Twitter()
+    tw = Twitter(Config())
     tw.login()
-    tw.sendText('3366')
+    tw.sendImage('33667aabb','850235756178161664,850235764663136256,850235774863761409,850235785630539779')

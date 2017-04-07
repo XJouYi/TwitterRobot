@@ -7,3 +7,4 @@ if __name__ == '__main__':
     conf = Config()
     tw = Twitter(conf)
     tw.login()
+    tw.sendText('99')

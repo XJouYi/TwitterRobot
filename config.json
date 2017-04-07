@@ -2,5 +2,11 @@
     "proxy":true,
     "proxy_url" : "socks5://127.0.0.1:1080",
     "login_code" : "",
-    "password" :""
+    "password" :"",
+    
+    "DB_HOST":"localhost",
+    "DB_PORT":3306,
+    "DB_USER":"root",
+    "DB_PASSWORD":"",
+    "DB_NAME":""
 }
