@@ -80,7 +80,7 @@ class TwitterTask(object):
                 pids = ""
                 iCount = 0
         if iCount > 0:
-            tw.sendImage(message.message_comment + str(iSend),pids.strip())
+            tw.sendImage(message.message_comment + str(iSend) + tw.getRandomTips(),pids.strip())
         self.saveToDatabase(message)
 
     def saveToDatabase(self,message):
@@ -95,7 +95,7 @@ class TwitterTask(object):
         while True:
             try:
                 currTime = datetime.now()
-                if self.lasttime == None or (currTime - self.lasttime).seconds / 60 >= 10:
+                if self.lasttime == None or (currTime - self.lasttime).seconds / 60 >= 30:
                     message = self.getMessage()
                     print(message.message_comment)
                     if message != None :

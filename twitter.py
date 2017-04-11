@@ -4,6 +4,7 @@ import requests
 import os
 import socks
 import json
+import random
 from bs4 import BeautifulSoup
 from config import Config
 
@@ -24,12 +25,15 @@ class Twitter(object):
         
         self.getToken()
         self.login()
+        self.getHotTips()
 
     def getToken(self):
         soup = BeautifulSoup(self.session.get('https://twitter.com').content,'lxml')
         token = soup.find_all('input',{'name':'authenticity_token'})
         self.authenticity_token = token[0].get('value')
         print('token',token[0].get('value'))
+
+
     def login(self):
         data = {
             'session[username_or_email]' :self.config.Login,
@@ -41,6 +45,28 @@ class Twitter(object):
             'authenticity_token':self.authenticity_token
         }
         resp = self.session.post('https://twitter.com/sessions',data = data)
+        
+        
+    def getHotTips(self):
+        resp = self.session.get('https://twitter.com/i/trends?pc=true&show_context=true&src=module')
+        text = resp.content
+        text = text.replace(r'\"',"'")
+        text = text.replace(r"\n","")
+        textJson = json.loads(text)
+        soup = BeautifulSoup(textJson['module_html'],'lxml')
+        lis = soup.find_all('li')
+        self.hotTips = []
+        for item in lis:
+            tip = item.get('data-trend-name')
+            if tip != None:
+                self.hotTips.append(tip)
+        
+    def getRandomTips(self):      
+        if self.hotTips == None or len(self.hotTips) == 0:
+            return ""
+        iCount = random.randint(0,len(self.hotTips)-1)
+        return self.hotTips[iCount]
+        
     def sendText(self,test):
         data = {
             'authenticity_token' : self.authenticity_token,
@@ -87,11 +113,8 @@ class Twitter(object):
             'command' : 'FINALIZE',
             'media_id': media_id
         })
-        # print(resp.content)
         
     def sendImage(self,text,media_id):
-        # media_id = self.uploadImage('/Users/jinyi/Downloads/IMG_0728.PNG')
-        # media_id = '850180885173415936'
         data = {
             'authenticity_token' : self.authenticity_token,
             'is_permalink_page' : 'false',
@@ -104,9 +127,8 @@ class Twitter(object):
         self.session.headers["referer"]="https://twitter.com/"
         self.session.headers["x-twitter-active-user"] = 'yes'
         resp = self.session.post('https://twitter.com/i/tweet/create',data = data)
-        # print(resp.content)
         
 if __name__ == '__main__':
     tw = Twitter(Config())
-    tw.login()
-    tw.sendImage('33667aabb','850235756178161664,850235764663136256,850235774863761409,850235785630539779')
+    print(tw.getRandomTips())
+    # tw.sendImage('33667aabb','850235756178161664,850235764663136256,850235774863761409,850235785630539779')
